@@ -52,12 +52,6 @@ def main():
                               required=True,
                               help=''' The full path to the public key file
                                        corresponding to the secret key.''')
-    import_parse.add_argument('--in', '-i',
-                              action='store',
-                              dest='infile_names',
-                              required=True,
-                              nargs='+',
-                              help='The name of the input file(s) in the correct order.')
     format_group = import_parse.add_mutually_exclusive_group()
     format_group.add_argument('--png', '-png',
                               action='store_true',
@@ -68,6 +62,12 @@ def main():
                               dest='base64',
                               default=True,
                               help='Read the input file(s) as a base64 string.')
+    import_parse.add_argument('--in', '-i',
+                              action='store',
+                              dest='infile_names',
+                              required=True,
+                              nargs='+',
+                              help='The name of the input file(s) in the correct order.')
 
 
     export_parse = subparsers.add_parser('export',
@@ -83,11 +83,6 @@ def main():
                               default=4,
                               type=int,
                               help='The number of files to split the key into.')
-    export_parse.add_argument('--out', '-o',
-                              action='store',
-                              required=True,
-                              dest='outfile_name',
-                              help='The base output file name.')
     format_group = export_parse.add_argument_group()
     format_group.add_argument('--base64', '-b64',
                               action='store_true',
@@ -104,6 +99,11 @@ def main():
                               dest='size',
                               default=400,
                               help='Height and width of png qrcode(s) in pixels.')
+    export_parse.add_argument('--out', '-o',
+                              action='store',
+                              required=True,
+                              dest='outfile_name',
+                              help='The base output file name.')
 
     if len(sys.argv) == 1:
         parser.print_help()

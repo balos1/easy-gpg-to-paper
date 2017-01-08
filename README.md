@@ -35,9 +35,10 @@ import/export gpg key from/to qrcode(s) or base64 string(s)
 
 positional arguments:
   {import,export}  commands
+>
 >gpg2paper.py import -h
-usage: gpg2paper.py import [-h] --pubkey PUBKEY --in INFILE_NAMES
-                           [INFILE_NAMES ...] [--png | --base64]
+usage: gpg2paper.py import [-h] --pubkey PUBKEY [--png | --base64] --in
+                           INFILE_NAMES [INFILE_NAMES ...]
 
 import gpg key from qrcode(s)/base64
 
@@ -46,13 +47,14 @@ optional arguments:
   --pubkey PUBKEY, -k PUBKEY
                         The full path to the public key file corresponding to
                         the secret key.
-  --in INFILE_NAMES [INFILE_NAMES ...], -i INFILE_NAMES [INFILE_NAMES ...]
-                        The name of the input file(s) in the correct order.
   --png, -png           Read the input file(s) as a png qrcode(s).
   --base64, -b64        Read the input file(s) as a base64 string.
+  --in INFILE_NAMES [INFILE_NAMES ...], -i INFILE_NAMES [INFILE_NAMES ...]
+                        The name of the input file(s) in the correct order.
+>
 > gpg2paper.py export -h
-usage: gpg2paper.py export [-h] --keyid KEYID [--numfiles NUMFILES] --out
-                           OUTFILE_NAME [--base64] [--png] [--size SIZE]
+usage: gpg2paper.py export [-h] --keyid KEYID [--numfiles NUMFILES] [--base64]
+                           [--png] [--size SIZE] --out OUTFILE_NAME
 
 export gpg key to qrcode(s)
 
