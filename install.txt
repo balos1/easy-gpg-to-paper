@@ -1,0 +1,9 @@
+# Linux manual install
+> sudo apt-get install paperkey zbarimg && pip install pillow qrcode
+> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> 
+
+# OSX manual Installation
+> brew install paperkey zbar && pip install pillow qrcode
+> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> 

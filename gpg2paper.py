@@ -33,7 +33,7 @@ import sys
 import argparse
 import subprocess
 import base64
-import qrencode
+import qrcode
 
 def main():
     """
@@ -158,9 +158,16 @@ def do_export(args):
     base64str = base64.b64encode(paperkey)
     chunks = chunk_up(base64str, args.numfiles)
 
+
     for i, chunk in enumerate(chunks):
         if args.png:
-            (_, _, image) = qrencode.encode_scaled(chunk, int(args.size))
+            # Set version to none, and use fit=True when making qrcode so the version,
+            # which determines the amount of data the qrcode can store, is selected automatically
+            qrc = qrcode.QRCode(version=None,
+                                error_correction=qrcode.constants.ERROR_CORRECT_Q)
+            qrc.add_data(chunk)
+            qrc.make(fit=True)
+            image = qrc.make_image()
             image.save('%s%d.png' % (outfile_name, i+1), 'PNG')
         if args.base64:
             with open('%s%d.%s' % (outfile_name, i+1, outfile_ext), 'wb') as txt_file:
