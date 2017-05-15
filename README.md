@@ -19,11 +19,25 @@ I would like to thank these projects and people for inspiration:
 + [paperkey](http://www.jabberwocky.com/software/paperkey/)
 + [libqrencode](http://fukuchi.org/works/qrencode/)
 + [zbarimg](http://zbar.sourceforge.net/)
-+ [my fork of pyqrencode](https://github.com/cojomojo/pyqrencode)
+
+# Install
+
+### Ubuntu/Debian
+
+```bash
+> sudo apt-get install paperkey zbar-tools && pip install pillow qrcode
+> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+```
+
+### OSX manual Installation
+
+```bash 
+> brew install paperkey zbar && pip install pillow qrcode
+> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+```
 
 # Setup and Usage
 
-1. Install the dependencies.
 2. Clone/download the repository.
 3. Add gpg2paper.py to your path and give it executable permissions.
 

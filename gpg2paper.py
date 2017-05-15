@@ -158,13 +158,11 @@ def do_export(args):
     base64str = base64.b64encode(paperkey)
     chunks = chunk_up(base64str, args.numfiles)
 
-
     for i, chunk in enumerate(chunks):
         if args.png:
             # Set version to none, and use fit=True when making qrcode so the version,
             # which determines the amount of data the qrcode can store, is selected automatically
-            qrc = qrcode.QRCode(version=None,
-                                error_correction=qrcode.constants.ERROR_CORRECT_Q)
+            qrc = qrcode.QRCode(version=None)
             qrc.add_data(chunk)
             qrc.make(fit=True)
             image = qrc.make_image()
