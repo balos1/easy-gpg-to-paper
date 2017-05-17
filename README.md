@@ -28,6 +28,7 @@ I would like to thank these projects and people for inspiration:
 ```bash
 > sudo apt-get install paperkey zbar-tools && pip install pillow qrcode
 > git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> sudo cp gpg2paper/gpg2paper.py  /usr/local/bin
 ```
 
 ### OSX manual Installation
@@ -35,6 +36,7 @@ I would like to thank these projects and people for inspiration:
 ```bash 
 > brew install paperkey zbar && pip install pillow qrcode
 > git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> sudo cp gpg2paper/gpg2paper.py  /usr/local/bin
 ```
 
 # Usage
