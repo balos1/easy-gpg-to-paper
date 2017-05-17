@@ -4,23 +4,24 @@ easy-gpg-to-paper aims to make exporting your secret gpg key to paper, and then 
 It can export your key to qrcode(s), or it can export your key as a base64 encoded string(s). In the future the code will be cleaned 
 up, and more features added. Anyone who wants to help out is more than welcome. 
 
-Tested with python 2.7.12 and 3.5.2.
+[![Build Status](https://travis-ci.org/cojomojo/easy-gpg-to-paper.svg?branch=master)](https://travis-ci.org/cojomojo/easy-gpg-to-paper)
+[![Version number](https://img.shields.io/badge/version-v0.1.0-blue.svg)](https://img.shields.io/badge/version-v0.1.0-blue.svg)
 
 # Contributors
 
 I would like to thank these projects and people for inspiration:
 
 + [paperkey](http://www.jabberwocky.com/software/paperkey/)
-+ [pyqrencode](https://github.com/Arachnid/pyqrencode)
 + user @joostrijneveld for [this gist](https://gist.github.com/joostrijneveld/59ab61faa21910c8434c)
 
 # Dependencies
 
 + [paperkey](http://www.jabberwocky.com/software/paperkey/)
-+ [libqrencode](http://fukuchi.org/works/qrencode/)
 + [zbarimg](http://zbar.sourceforge.net/)
++ [python-qrcode](https://github.com/lincolnloop/python-qrcode)
++ [Pillow](https://github.com/python-pillow/Pillow)
 
-# Install
+# Installation
 
 ### Ubuntu/Debian
 
@@ -36,21 +37,17 @@ I would like to thank these projects and people for inspiration:
 > git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
 ```
 
-# Setup and Usage
-
-2. Clone/download the repository.
-3. Add gpg2paper.py to your path and give it executable permissions.
+# Usage
 
 ```bash
-> gpg2paper.py
+> ./gpg2paper.py
 usage: gpg2paper.py {import,export} ...
 
 import/export gpg key from/to qrcode(s) or base64 string(s)
 
 positional arguments:
   {import,export}  commands
->
->gpg2paper.py import -h
+> ./gpg2paper.py import -h
 usage: gpg2paper.py import [-h] --pubkey PUBKEY [--png | --base64] --in
                            INFILE_NAMES [INFILE_NAMES ...]
 
@@ -65,8 +62,7 @@ optional arguments:
   --base64, -b64        Read the input file(s) as a base64 string.
   --in INFILE_NAMES [INFILE_NAMES ...], -i INFILE_NAMES [INFILE_NAMES ...]
                         The name of the input file(s) in the correct order.
->
-> gpg2paper.py export -h
+> ./gpg2paper.py export -h
 usage: gpg2paper.py export [-h] --keyid KEYID [--numfiles NUMFILES] [--base64]
                            [--png] [--size SIZE] --out OUTFILE_NAME
 

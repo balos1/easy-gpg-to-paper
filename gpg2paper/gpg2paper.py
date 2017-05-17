@@ -30,6 +30,7 @@ SOFTWARE.
 from __future__ import print_function
 from __future__ import with_statement
 import sys
+import os
 import argparse
 import subprocess
 import base64
@@ -159,6 +160,12 @@ def do_export(args):
     chunks = chunk_up(base64str, args.numfiles)
 
     for i, chunk in enumerate(chunks):
+        if not os.path.exists(os.path.dirname(outfile_name)):
+            try:
+                os.makedirs(os.path.dirname(outfile_name))
+            except OSError as exc: # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
         if args.png:
             # Set version to none, and use fit=True when making qrcode so the version,
             # which determines the amount of data the qrcode can store, is selected automatically

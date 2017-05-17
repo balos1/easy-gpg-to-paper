@@ -1,0 +1,23 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.5-dev" # 3.5 development branch
+  - "3.6"
+  - "3.6-dev" # 3.6 development branch
+  - "3.7-dev" # 3.7 development branch
+  - "nightly" # currently points to 3.7-dev
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install paperkey zbar-tools
+  # Show the current setuptools version
+  - python -c "import setuptools; print(setuptools.__version__)"
+  # Show the pytest version
+  - py.test --version
+install:
+  - pip install .
+# command to run tests
+script:
+  - py.test tests/*_tests.py  
