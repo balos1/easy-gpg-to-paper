@@ -6,13 +6,7 @@ up, and more features added. Anyone who wants to help out is more than welcome.
 
 [![Build Status](https://travis-ci.org/cojomojo/easy-gpg-to-paper.svg?branch=master)](https://travis-ci.org/cojomojo/easy-gpg-to-paper)
 [![Version number](https://img.shields.io/badge/version-v0.1.0-blue.svg)](https://img.shields.io/badge/version-v0.1.0-blue.svg)
-
-# Contributors
-
-I would like to thank these projects and people for inspiration:
-
-+ [paperkey](http://www.jabberwocky.com/software/paperkey/)
-+ user @joostrijneveld for [this gist](https://gist.github.com/joostrijneveld/59ab61faa21910c8434c)
+[![Supports](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7--dev-blue.svg)](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7--dev-blue.svg)
 
 # Dependencies
 
@@ -31,7 +25,7 @@ I would like to thank these projects and people for inspiration:
 > sudo cp gpg2paper/gpg2paper.py  /usr/local/bin
 ```
 
-### OSX manual Installation
+### macOS
 
 ```bash 
 > brew install paperkey zbar && pip install pillow qrcode
@@ -88,6 +82,33 @@ optional arguments:
 
 The protection and encryption status of and security requirements for storing your secret key are not changed by easy-gpg-to-paper.
 Passphrase protected keys are output in their passphrase protected form.
+
+# Contributing
+
+### Ubuntu/Debian
+
+```bash
+> sudo apt-get install paperkey zbar-tools && pip install pillow qrcode
+> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> pip install . pytest
+```
+
+### macOS
+
+```bash 
+> brew install paperkey zbar && pip install pillow qrcode
+> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> pip install . pytest
+```
+
+Contributions are welcome with arms wide open.
+
+# Credits
+
+I would like to thank these projects and people for inspiration:
+
++ [paperkey](http://www.jabberwocky.com/software/paperkey/)
++ user @joostrijneveld for [this gist](https://gist.github.com/joostrijneveld/59ab61faa21910c8434c)
 
 # License
 MIT
