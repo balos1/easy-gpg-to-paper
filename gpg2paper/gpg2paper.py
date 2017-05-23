@@ -97,7 +97,7 @@ def main():
     export_parse.add_argument('--out', '-o',
                               action='store',
                               required=True,
-                              dest='outfile_name',
+                              dest='out_filename',
                               help='The base output file name.')
 
     if len(sys.argv) == 1:
@@ -110,6 +110,7 @@ def main():
     else:
         do_export(args)
 
+
 def do_import(args):
     """
     The "import" CLI command. With it you can import a base64 encoded version
@@ -117,21 +118,52 @@ def do_import(args):
     """
 
     base64str = b''
-    for in_filename in args.in_filenames:
-        if args.png:
-            chunk = subprocess.check_output(['zbarimg', '--raw', in_filename])
-            base64str += chunk
-        elif args.base64:
-            with open(in_filename, 'rb') as in_file:
-                chunk = in_file.read()
-                base64str += chunk
-    raw = base64.b64decode(base64str)
-    paperkey = subprocess.Popen(['paperkey', '--pubring', args.pubkey],
+    if args.png:
+        base64str = read_chunks_png(args.in_filenames)
+    elif args.base64:
+        base64str = read_chunks_b64(args.in_filenames)
+    return import_from_b64(args.pubkey, base64.b64decode(base64str))
+
+
+def import_from_b64(pubkey_path, private_bytes):
+    """
+    Imports the private GPG key to the gpg key ring.
+    """
+
+    paperkey = subprocess.Popen(args=['paperkey', '--pubring', pubkey_path],
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE)
-    (paperkey_stdout, _) = paperkey.communicate(raw)
-    gpg = subprocess.Popen(['gpg', '--import'], stdin=subprocess.PIPE)
+    (paperkey_stdout, _) = paperkey.communicate(private_bytes)
+    gpg = subprocess.Popen(args=['gpg', '--import'],
+                           stdin=subprocess.PIPE,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
     return gpg.communicate(paperkey_stdout)
+
+
+def read_chunks_png(in_filenames):
+    """
+    Reads base64 encoded private key data from many PNG QR codes.
+    """
+
+    base64str = b''
+    for in_filename in in_filenames:
+        chunk = subprocess.check_output(['zbarimg', '--raw', in_filename])
+        base64str += chunk
+    return base64str
+
+
+def read_chunks_b64(in_filenames):
+    """
+    Reads base64 encoded private key data from many files.
+    """
+
+    base64str = b''
+    for in_filename in in_filenames:
+        with open(in_filename, 'rb') as in_file:
+            chunk = in_file.read()
+            base64str += chunk
+    return base64str
 
 
 def do_export(args):
@@ -141,10 +173,10 @@ def do_export(args):
 
     if args.png:
         write_chunks_png(chunks=export_as_b64(args.key_id, args.num_files),
-                         outfile_path=args.outfile_name)
-    elif args.base64:
+                         outfile_path=args.out_filename)
+    if args.base64:
         write_chunks_b64(chunks=export_as_b64(args.key_id, args.num_files),
-                         outfile_path=args.outfile_name)
+                         outfile_path=args.out_filename)
 
 
 def export_as_b64(key_id, num_files):
@@ -174,6 +206,7 @@ def write_chunks_png(chunks, outfile_path):
         qrc.make(fit=True)
         image = qrc.make_image()
         image.save('%s%d.png' % (outfile_path, i+1), 'PNG')
+    return len(chunks)
 
 
 def write_chunks_b64(chunks, outfile_path):
@@ -181,29 +214,30 @@ def write_chunks_b64(chunks, outfile_path):
     Writes the data chunks to text files as base64 encoded strings.
     """
 
-    outfile_name = outfile_path.split('.')
+    out_filename = outfile_path.split('.')
     outfile_ext = 'txt'
-    if len(outfile_name) > 1:
-        (outfile_name, outfile_ext) = outfile_name
+    if len(out_filename) > 1:
+        (out_filename, outfile_ext) = out_filename
     else:
-        outfile_name = outfile_name[0]
+        out_filename = out_filename[0]
 
-    make_output_dir(outfile_name)
+    make_output_dir(out_filename)
     for i, chunk in enumerate(chunks):
-        with open('%s%d.%s' % (outfile_name, i+1, outfile_ext), 'wb') as txt_file:
+        with open('%s%d.%s' % (out_filename, i+1, outfile_ext), 'wb') as txt_file:
             txt_file.write(chunk)
+    return len(chunks)
 
 
-def make_output_dir(outfile_name):
+def make_output_dir(out_filename):
     """
     Makes the directory to output the file to if it doesn't exist.
     """
 
     # check if output is to cwd, or is a path
-    dirname = os.path.dirname(outfile_name)
+    dirname = os.path.dirname(out_filename)
     if dirname != '' and not os.path.exists(dirname):
         try:
-            os.makedirs(os.path.dirname(outfile_name))
+            os.makedirs(os.path.dirname(out_filename))
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
@@ -227,7 +261,7 @@ def chunk_up(base64str, num_chunks):
 
 class MyParser(argparse.ArgumentParser):
     """
-    Custom ArgumentParser class that will print help when there was a misuage.
+    Custom ArgumentParser class that will print help when there was a misusage.
     """
 
     def error(self, message):

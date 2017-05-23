@@ -20,4 +20,4 @@ install:
   - pip install .
 # command to run tests
 script:
-  - py.test tests/*_tests.py  
+  - py.test tests/test_*.py
