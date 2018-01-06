@@ -53,8 +53,8 @@ def main():
                               action='store',
                               dest='pubkey',
                               required=True,
-                              help=''' The full path to the public key file
-                                       corresponding to the secret key.''')
+                              help='''The full path to the public key file
+                                      corresponding to the secret key.''')
     format_group = import_parse.add_mutually_exclusive_group()
     format_group.add_argument('--png', '-png',
                               action='store_true',
@@ -77,14 +77,14 @@ def main():
     export_parse.add_argument('--keyid', '-k',
                               action='store',
                               dest='key_id',
-                              required=True,
+                              required=False,
                               help='The gpg secret key ID to export.')
-    export_parse.add_argument('--numfiles', '-n',
+    export_parse.add_argument('--numfiles', '--numchunks', '-n',
                               action='store',
-                              dest='num_files',
+                              dest='num_chunks',
                               default=4,
                               type=int,
-                              help='The number of files to split the key into.')
+                              help='The number of chunks to split the key into.')
     format_group = export_parse.add_argument_group()
     format_group.add_argument('--base64', '-b64',
                               action='store_true',
@@ -185,43 +185,54 @@ def do_export(args):
 
     html = ''
     filename = ''
+    no_html = False
+
+    if args.key_id:
+        chunks = export_as_b64(key_id=args.key_id, num_chunks=args.num_chunks)
+    else:
+        chunks = export_as_b64(stream=sys.stdin, num_chunks=args.num_chunks)
+
     if args.png:
-        paths = write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+        paths = write_chunks(chunks=chunks,
                              output_folder=args.output_folder,
                              ext='PNG')
-        (filename, html) = create_html_file(args.num_files, paths, args.output_folder)
     elif args.jpg:
-        paths = write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+        paths = write_chunks(chunks=chunks,
                              output_folder=args.output_folder,
                              ext='JPEG')
-        (filename, html) = create_html_file(args.num_files, paths, args.output_folder)
     elif args.base64:
-        write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+        no_html = True
+        write_chunks(chunks=chunks,
                      output_folder=args.output_folder,
                      ext='txt')
     else:
-        paths = write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+        paths = write_chunks(chunks=chunks,
                              output_folder=args.output_folder,
                              ext='PNG')
-        (filename, html) = create_html_file(args.num_files, paths, args.output_folder)
+
+    if not no_html:
+        (filename, html) = create_html_file(num_chunks=args.num_chunks,
+                                            outfile_paths=paths,
+                                            outfile_path=args.output_folder)
+        if args.pdf:
+            create_pdf_file(html=html, outfile_path=args.output_folder)
+        print('preview your QR codes in your browser file://%s' % os.path.join(filename))
 
 
-    if args.pdf:
-        create_pdf_file(html, args.output_folder)
-
-    print('preview your QR codes in your browser file://%s' % os.path.join(filename))
-
-
-def export_as_b64(key_id, num_files):
+def export_as_b64(key_id=None, num_chunks=4, stream=None):
     """
     The export command. With it you can export your gpg secret key to a base64 encoded string
     across n chunks.
     """
 
-    secret = subprocess.Popen(['gpg', '--export-secret-key', key_id], stdout=subprocess.PIPE)
-    paperkey = subprocess.check_output(['paperkey', '--output-type', 'raw'], stdin=secret.stdout)
+    if stream is not None:
+        secret = stream
+        paperkey = subprocess.check_output(['paperkey', '--output-type', 'raw'], stdin=secret)
+    else:
+        secret = subprocess.Popen(['gpg', '--export-secret-key', key_id], stdout=subprocess.PIPE)
+        paperkey = subprocess.check_output(['paperkey', '--output-type', 'raw'], stdin=secret.stdout)
     base64str = base64.b64encode(paperkey)
-    chunks = chunk_up(base64str, num_files)
+    chunks = chunk_up(base64str, num_chunks)
     return chunks
 
 
@@ -259,7 +270,6 @@ def write_chunks_b64(chunks, outfile_path):
         (out_filename, outfile_ext) = out_filename
     else:
         out_filename = out_filename[0]
-
     outfile_paths = []
     make_output_dir(out_filename)
     for i, chunk in enumerate(chunks):
