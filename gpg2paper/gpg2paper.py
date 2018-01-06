@@ -31,10 +31,12 @@ from __future__ import print_function, with_statement
 import argparse
 import base64
 import errno
+from fractions import gcd
 import os
 import subprocess
 import sys
 import qrcode
+from weasyprint import HTML
 
 def main():
     """
@@ -94,11 +96,21 @@ def main():
                               dest='png',
                               default=False,
                               help='Output the gpg key as a png qrcode(s).')
+    format_group.add_argument('--jpg', '-jpg',
+                              action='store_true',
+                              dest='jpg',
+                              default=False,
+                              help='Output the gpg key as a jpeg qrcode(s).')
+    format_group.add_argument('--pdf', '-pdf',
+                              action='store_true',
+                              dest='pdf',
+                              default=False,
+                              help='Output the gpg key in a pdf file.')
     export_parse.add_argument('--out', '-o',
                               action='store',
                               required=True,
-                              dest='out_filename',
-                              help='The base output file name.')
+                              dest='output_folder',
+                              help='The output folder name.')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -171,12 +183,33 @@ def do_export(args):
     The "export" CLI command.
     """
 
+    html = ''
+    filename = ''
     if args.png:
-        write_chunks_png(chunks=export_as_b64(args.key_id, args.num_files),
-                         outfile_path=args.out_filename)
-    if args.base64:
-        write_chunks_b64(chunks=export_as_b64(args.key_id, args.num_files),
-                         outfile_path=args.out_filename)
+        paths = write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+                             output_folder=args.output_folder,
+                             ext='PNG')
+        (filename, html) = create_html_file(args.num_files, paths, args.output_folder)
+    elif args.jpg:
+        paths = write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+                             output_folder=args.output_folder,
+                             ext='JPEG')
+        (filename, html) = create_html_file(args.num_files, paths, args.output_folder)
+    elif args.base64:
+        write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+                     output_folder=args.output_folder,
+                     ext='txt')
+    else:
+        paths = write_chunks(chunks=export_as_b64(args.key_id, args.num_files),
+                             output_folder=args.output_folder,
+                             ext='PNG')
+        (filename, html) = create_html_file(args.num_files, paths, args.output_folder)
+
+
+    if args.pdf:
+        create_pdf_file(html, args.output_folder)
+
+    print('preview your QR codes in your browser file://%s' % os.path.join(filename))
 
 
 def export_as_b64(key_id, num_files):
@@ -192,21 +225,27 @@ def export_as_b64(key_id, num_files):
     return chunks
 
 
-def write_chunks_png(chunks, outfile_path):
+def write_chunks(chunks, output_folder, ext):
     """
-    Writes the data chunks to png files.
+    Writes the data chunks to png or jpg files.
     """
 
-    make_output_dir(outfile_path)
-    for i, chunk in enumerate(chunks):
-        # Set version to none, and use fit=True when making qrcode so the version,
-        # which determines the amount of data the qrcode can store, is selected automatically.
-        qrc = qrcode.QRCode(version=None)
-        qrc.add_data(chunk)
-        qrc.make(fit=True)
-        image = qrc.make_image()
-        image.save('%s%d.png' % (outfile_path, i+1), 'PNG')
-    return len(chunks)
+    if ext == 'txt':
+        return write_chunks_b64(chunks, output_folder)
+    else:
+        codes_folder = make_output_dir(os.path.join(output_folder, 'images/'))
+        outfile_paths = []
+        for i, chunk in enumerate(chunks):
+            # Set version to none, and use fit=True when making qrcode so the version,
+            # which determines the amount of data the qrcode can store, is selected automatically.
+            qrc = qrcode.QRCode(version=None)
+            qrc.add_data(chunk)
+            qrc.make(fit=True)
+            image = qrc.make_image()
+            filename = '%d.%s' % (i+1, ext.lower())
+            outfile_paths.append(os.path.join('images', filename))
+            image.save(os.path.join(codes_folder, filename), ext)
+        return tuple(outfile_paths)
 
 
 def write_chunks_b64(chunks, outfile_path):
@@ -214,33 +253,37 @@ def write_chunks_b64(chunks, outfile_path):
     Writes the data chunks to text files as base64 encoded strings.
     """
 
-    out_filename = outfile_path.split('.')
     outfile_ext = 'txt'
+    out_filename = outfile_path.split('.')
     if len(out_filename) > 1:
         (out_filename, outfile_ext) = out_filename
     else:
         out_filename = out_filename[0]
 
+    outfile_paths = []
     make_output_dir(out_filename)
     for i, chunk in enumerate(chunks):
-        with open('%s%d.%s' % (out_filename, i+1, outfile_ext), 'wb') as txt_file:
+        filename = '%s%d.%s' % (out_filename, i+1, outfile_ext)
+        with open(filename, 'wb') as txt_file:
             txt_file.write(chunk)
-    return len(chunks)
+            outfile_paths.append(filename)
+    return tuple(outfile_paths)
 
 
-def make_output_dir(out_filename):
+def make_output_dir(output_folder):
     """
     Makes the directory to output the file to if it doesn't exist.
     """
 
     # check if output is to cwd, or is a path
-    dirname = os.path.dirname(out_filename)
+    dirname = os.path.dirname(output_folder)
     if dirname != '' and not os.path.exists(dirname):
         try:
-            os.makedirs(os.path.dirname(out_filename))
+            os.makedirs(os.path.dirname(output_folder))
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
+    return os.path.dirname(output_folder)
 
 
 def chunk_up(base64str, num_chunks):
@@ -257,6 +300,83 @@ def chunk_up(base64str, num_chunks):
         chunks.append(base64str[low:upper])
     chunks.append(base64str[(num_chunks-1)*chunk_size:])
     return chunks
+
+
+def create_html_file(num_chunks, outfile_paths, outfile_path):
+    """
+    Creates HTML file with png/jpg QR codes placed neatly.
+    """
+
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style type="text/css">
+            html,body {
+                height: 297mm;
+                width: 210mm;
+            }
+            @page {
+                size: a4;
+                margin: 1mm;
+            }
+            img {
+                width: %dmm;
+                margin: 0 1mm 0 1mm
+            }
+        </style>
+    </head>
+    <body>
+        <table id="contentarea">%s</table>
+    </body>
+    </html>
+    """
+    fit = fit_codes(num_chunks, outfile_paths)
+    html = html % fit
+    abspath = os.path.abspath(os.path.join(outfile_path, 'qrcodes' + '.html'))
+    with open(os.path.join(outfile_path, 'qrcodes' + '.html'), 'w') as f:
+        f.write(html)
+    return (abspath, html)
+
+
+def create_pdf_file(html, outfile_path):
+    """Creates a PDF file from the HTML file with nicely placed QR codes.
+    """
+    doc = HTML(string=html, base_url=outfile_path)
+    doc.write_pdf(os.path.join(outfile_path, 'qrcodes' + '.pdf'))
+
+
+def fit_codes(num_chunks, outfile_paths, auto=True, width=None):
+    """Optimally packs the QR code chunks into an HTML table representing an a4 piece of paper.
+
+    `fit_codes` tries to ensure that codes are large enough to be scanned once printed
+    by restricting the minimum QR code size to 25.4mm (1 inch) without padding. However, users
+    should always test their QR codes once printed to ensure they are readable and are valid.
+
+    It is possible to provide a set width for each QR code by passing setting `auto=False` and `width`
+    to some width in mm.
+    """
+    # A4 paper is approx. 210mm x 297mm.
+    # Make 25.4mm (1in) wide code is the minimum in order to minimize chance of the QR code
+    # being to dense to be printed successfully.
+    a4 = (210, 297)
+    # pad 3mm (~1/8 inch)
+    pad = 3
+    if auto:
+        # Try and fit codes in a minimal number of pages while maximizing their individual
+        # size by finding the GCD of the a4 paper dimensions.
+        # See https://en.wikipedia.org/wiki/Greatest_common_divisor#A_geometric_view for explanation.
+        width = max((a4[0]-pad)/gcd(a4[0], a4[1]), 26)
+    cols = (a4[0]-pad)//min(width, a4[0]-pad)
+    html = ''
+    for i in range(num_chunks):
+        if i % cols == 0:
+            html += '<tr>'
+        td = '<td><center><h2>Chunk %d</h2></center><img src="%s"></td>'
+        html += td % (i+1, outfile_paths[i])
+        if (i+1) % cols == 0 or (i+1) == num_chunks:
+            html += '</tr>'
+    return (width-pad, html)
 
 
 class MyParser(argparse.ArgumentParser):
