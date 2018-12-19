@@ -36,6 +36,7 @@ up, and more features added. Anyone who wants to help out is more than welcome.
 
 # Usage
 
+
 ```
 > ./gpg2paper.py
 usage: gpg2paper.py {import,export} ...
@@ -60,8 +61,9 @@ optional arguments:
   --in IN_FILENAMES [IN_FILENAMES ...], -i IN_FILENAMES [IN_FILENAMES ...]
                         The name of the input file(s) in the correct order.
 > ./gpg2paper.py export -h
-usage: gpg2paper.py export [-h] --keyid KEY_ID [--numfiles NUM_FILES]
-                           [--base64] [--png] --out OUT_FILENAME
+usage: gpg2paper.py export [-h] [--keyid KEY_ID] [--numfiles NUM_CHUNKS]
+                           [--base64] [--png] [--jpg] [--pdf] --out
+                           OUTPUT_FOLDER
 
 export gpg key to qrcode(s)
 
@@ -69,13 +71,16 @@ optional arguments:
   -h, --help            show this help message and exit
   --keyid KEY_ID, -k KEY_ID
                         The gpg secret key ID to export.
-  --numfiles NUM_FILES, -n NUM_FILES
-                        The number of files to split the key into.
-  --out OUT_FILENAME, -o OUT_FILENAME
-                        The base output file name.
+  --numfiles NUM_CHUNKS, --numchunks NUM_CHUNKS, -n NUM_CHUNKS
+                        The number of chunks to split the key into.
+  --out OUTPUT_FOLDER, -o OUTPUT_FOLDER
+                        The output folder name.
 
   --base64, -b64        Output the gpg key as a base64 string in a file(s).
-  --png, -png           Output the gpg key as a png qrcode(s)..
+  --png, -png           Output the gpg key as a png qrcode(s).
+  --jpg, -jpg           Output the gpg key as a jpeg qrcode(s).
+  --pdf, -pdf           Output the gpg key in a pdf file.
+
 ```
 
 # Security Considerations
