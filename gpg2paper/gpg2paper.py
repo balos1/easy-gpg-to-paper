@@ -6,7 +6,7 @@ Program for exporting and importing gpg keys to/from qrcode(s).
 
 The MIT License (MIT)
 
-Copyright (c) [2017] [Cody Balos]
+Copyright (c) 2017-2019 Cody Balos
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -160,8 +160,15 @@ def read_chunks_png(in_filenames):
 
     base64str = b''
     for in_filename in in_filenames:
-        chunk = subprocess.check_output(['zbarimg', '--raw', in_filename])
-        base64str += chunk
+        try:
+            # setting stderr to subprocess.STDOUT will silence the subprocess output
+            chunk = subprocess.check_output(['zbarimg', '--raw', in_filename])
+            base64str += chunk
+        except subprocess.CalledProcessError as exc:
+            print("[gpg2paper] ERROR: zbarimg returned %d" % exc.returncode)
+            if exc.returncode == 4:
+                print("[gpg2paper] ERROR: try downsampling the QR code or split the key into more images")
+            sys.exit(exc.returncode)
     return base64str
 
 
@@ -189,8 +196,6 @@ def do_export(args):
 
     if args.key_id:
         chunks = export_as_b64(key_id=args.key_id, num_chunks=args.num_chunks)
-    else:
-        chunks = export_as_b64(stream=sys.stdin, num_chunks=args.num_chunks)
 
     if args.png:
         paths = write_chunks(chunks=chunks,
@@ -216,7 +221,7 @@ def do_export(args):
                                             outfile_path=args.output_folder)
         if args.pdf:
             create_pdf_file(html=html, outfile_path=args.output_folder)
-        print('preview your QR codes in your browser file://%s' % os.path.join(filename))
+        print('[gpg2paper] preview your QR codes in your browser file://%s' % os.path.join(filename))
 
 
 def export_as_b64(key_id=None, num_chunks=4, stream=None):
@@ -224,13 +229,8 @@ def export_as_b64(key_id=None, num_chunks=4, stream=None):
     The export command. With it you can export your gpg secret key to a base64 encoded string
     across n chunks.
     """
-
-    if stream is not None:
-        secret = stream
-        paperkey = subprocess.check_output(['paperkey', '--output-type', 'raw'], stdin=secret)
-    else:
-        secret = subprocess.Popen(['gpg', '--export-secret-key', key_id], stdout=subprocess.PIPE)
-        paperkey = subprocess.check_output(['paperkey', '--output-type', 'raw'], stdin=secret.stdout)
+    secret = subprocess.Popen(['gpg', '--export-secret-key', key_id], stdout=subprocess.PIPE)
+    paperkey = subprocess.check_output(['paperkey', '--output-type', 'raw'], stdin=secret.stdout)
     base64str = base64.b64encode(paperkey)
     chunks = chunk_up(base64str, num_chunks)
     return chunks
