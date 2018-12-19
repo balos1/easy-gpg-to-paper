@@ -4,7 +4,7 @@ easy-gpg-to-paper aims to make exporting your secret gpg key to paper, and then 
 It can export your key to qrcode(s), or it can export your key as a base64 encoded string(s). In the future the code will be cleaned
 up, and more features added. Anyone who wants to help out is more than welcome.
 
-[![Build Status](https://travis-ci.org/cojomojo/easy-gpg-to-paper.svg?branch=master)](https://travis-ci.org/cojomojo/easy-gpg-to-paper)
+[![Build Status](https://travis-ci.org/balos1/easy-gpg-to-paper.svg?branch=master)](https://travis-ci.org/balos1/easy-gpg-to-paper)
 [![Version number](https://img.shields.io/badge/version-v0.2.0-blue.svg)](https://img.shields.io/badge/version-v0.2.0-blue.svg)
 [![Supports](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7--dev-blue.svg)](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7--dev-blue.svg)
 
@@ -22,7 +22,7 @@ up, and more features added. Anyone who wants to help out is more than welcome.
 
 ```
 > sudo apt-get install paperkey zbar-tools && pip install pillow qrcode weasyprint
-> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> git clone https://github.com/balos1/easy-gpg-to-paper.git && cd easy-gpg-to-paper
 > sudo cp gpg2paper/gpg2paper.py  /usr/local/bin
 ```
 
@@ -30,7 +30,7 @@ up, and more features added. Anyone who wants to help out is more than welcome.
 
 ```
 > brew install paperkey zbar && pip install pillow qrcode weasyprint
-> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> git clone https://github.com/balos1/easy-gpg-to-paper.git && cd easy-gpg-to-paper
 > sudo cp gpg2paper/gpg2paper.py  /usr/local/bin
 ```
 
@@ -89,7 +89,7 @@ Passphrase protected keys are output in their passphrase protected form.
 
 ```
 > sudo apt-get install paperkey zbar-tools && pip install pillow qrcode weasyprint
-> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> git clone https://github.com/balos1/easy-gpg-to-paper.git && cd easy-gpg-to-paper
 > pip install . pytest
 ```
 
@@ -97,7 +97,7 @@ Passphrase protected keys are output in their passphrase protected form.
 
 ```
 > brew install paperkey zbar && pip install pillow qrcode weasyprint
-> git clone https://github.com/cojomojo/easy-gpg-to-paper.git && cd easy-gpg-to-paper
+> git clone https://github.com/balos1/easy-gpg-to-paper.git && cd easy-gpg-to-paper
 > pip install . pytest
 ```
 
