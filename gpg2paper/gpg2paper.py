@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Program for exporting and importing gpg keys to/from qrcode(s).
