@@ -5,8 +5,8 @@ It can export your key to qrcode(s), or it can export your key as a base64 encod
 up, and more features added. Anyone who wants to help out is more than welcome.
 
 [![Build Status](https://travis-ci.org/balos1/easy-gpg-to-paper.svg?branch=master)](https://travis-ci.org/balos1/easy-gpg-to-paper)
-[![Version number](https://img.shields.io/badge/version-v0.2.0-blue.svg)](https://img.shields.io/badge/version-v0.2.0-blue.svg)
-[![Supports](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7--dev-blue.svg)](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7--dev-blue.svg)
+[![Version number](https://img.shields.io/badge/version-v0.2.1-blue.svg)](https://img.shields.io/badge/version-v0.2.1-blue.svg)
+[![Supports](https://img.shields.io/badge/python-3.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7-blue.svg)](https://img.shields.io/badge/python-3.3%2C%203.4%2C%203.5%2C%203.6%2C%203.7-blue.svg)
 
 # Dependencies
 
