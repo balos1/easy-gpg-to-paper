@@ -1,30 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Program for exporting and importing gpg keys to/from qrcode(s).
 
 
-The MIT License (MIT)
-
-Copyright (c) [2017] [Cody Balos]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Copyright (c) 2017-2019 Cody Balos.
+See LICENSE for detials.
 """
 
 from __future__ import print_function, with_statement
@@ -160,8 +141,15 @@ def read_chunks_png(in_filenames):
 
     base64str = b''
     for in_filename in in_filenames:
-        chunk = subprocess.check_output(['zbarimg', '--raw', in_filename])
-        base64str += chunk
+        try:
+            # setting stderr to subprocess.STDOUT will silence the subprocess output
+            chunk = subprocess.check_output(['zbarimg', '--raw', in_filename])
+            base64str += chunk
+        except subprocess.CalledProcessError as exc:
+            print("[gpg2paper] ERROR: zbarimg returned %d" % exc.returncode)
+            if exc.returncode == 4:
+                print("[gpg2paper] ERROR: try downsampling the QR code or split the key into more images")
+            sys.exit(exc.returncode)
     return base64str
 
 
@@ -216,7 +204,7 @@ def do_export(args):
                                             outfile_path=args.output_folder)
         if args.pdf:
             create_pdf_file(html=html, outfile_path=args.output_folder)
-        print('preview your QR codes in your browser file://%s' % os.path.join(filename))
+        print('[gpg2paper] preview your QR codes in your browser file://%s' % os.path.join(filename))
 
 
 def export_as_b64(key_id=None, num_chunks=4, stream=None):
